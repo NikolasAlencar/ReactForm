@@ -13,6 +13,18 @@ interface ValueForm {
   checkboxTerms: boolean;
 }
 
+const FORM_FIELDS = [
+  { label: "Name", id: "name", type: "text" },
+  { label: "Email", id: "email", type: "email" },
+  { label: "Password", id: "password", type: "password" },
+  { label: "Confirm Password", id: "confirmPassword", type: "password" },
+  { label: "Bio", id: "bio", type: "textarea", rows: 3 },
+];
+
+const onSubmit = (valueForm: ValueForm) => {
+  console.log(valueForm);
+};
+
 const schema = z
   .object({
     name: z.string().min(6, "Por favor, informe um nome válido!"),
@@ -37,7 +49,7 @@ const Form = () => {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm({
+  } = useForm<ValueForm>({
     mode: "all",
     criteriaMode: "all",
     resolver: zodResolver(schema),
@@ -52,42 +64,30 @@ const Form = () => {
     },
   });
 
-  const onSubmit = (valueForm: ValueForm) => {
-    console.log(valueForm);
-  };
-
   return (
     <div className="form-container">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="form-group">
-          <label htmlFor="name">Name:</label>
-          <input type="text" id="name" {...register("name")} />
-          {errors.name && <p>{errors.name.message}</p>}
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Email:</label>
-          <input type="email" id="email" {...register("email")} />
-          {errors.email && <p>{errors.email.message}</p>}
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input type="password" id="password" {...register("password")} />
-          {errors.password && <p>{errors.password.message}</p>}
-        </div>
-        <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm Password:</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            {...register("confirmPassword")}
-          />
-          {errors.confirmPassword && <p>{errors.confirmPassword.message}</p>}
-        </div>
-        <div className="form-group">
-          <label htmlFor="bio">Bio:</label>
-          <textarea id="bio" {...register("bio")} rows={3}></textarea>
-          {errors.bio && <p>{errors.bio.message}</p>}
-        </div>
+        {FORM_FIELDS.map((field) => (
+          <div className="form-group" key={field.id}>
+            <label htmlFor={field.id}>{field.label}:</label>
+            {field.type === "textarea" ? (
+              <textarea
+                id={field.id}
+                {...register(field.id as keyof ValueForm)}
+                rows={field.rows || 3}
+              ></textarea>
+            ) : (
+              <input
+                type={field.type}
+                id={field.id}
+                {...register(field.id as keyof ValueForm)}
+              />
+            )}
+            {errors[field.id as keyof ValueForm] && (
+              <p>{errors[field.id as keyof ValueForm]?.message}</p>
+            )}
+          </div>
+        ))}
         <div className="form-group">
           <label htmlFor="gender">Gender:</label>
           <select id="gender" {...register("gender")}>
